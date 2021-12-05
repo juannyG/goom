@@ -68,20 +68,22 @@ func (dw *DBWrapper) createTable() {
 
 func (dw *DBWrapper) createData() {
 	// There shouldn't be any merchants in the DB
-	dw.insertMerchant(testMerchant, true)
-	dw.insertProduct(1, testProduct, true, true)
+	id := dw.insertMerchant(testMerchant, true)
+	dw.insertProduct(int(id), testProduct, true, true)
 }
 
-func (dw *DBWrapper) insertMerchant(publicId string, live bool) {
+func (dw *DBWrapper) insertMerchant(publicId string, live bool) int {
 	stmt, err := dw.DB.Prepare(`INSERT INTO merchant_merchant (public_id, live) VALUES (?, ?)`)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	_, err = stmt.Exec(publicId, live)
+	res, err := stmt.Exec(publicId, live)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	id, err := res.LastInsertId()
+	return int(id)
 }
 
 func (dw *DBWrapper) insertProduct(merchantId int, externalProductId string, autoshipEnabled bool, live bool) {
