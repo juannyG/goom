@@ -13,7 +13,8 @@ const dbName = "./test.db"
 const merchantTableSql = `
 CREATE TABLE merchant_merchant (
     "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "public_id" TEXT
+    "public_id" TEXT,
+    "live" INTEGER DEFAULT 1
 );`
 
 const productTableSql = `
@@ -27,11 +28,13 @@ CREATE TABLE product_product (
 );
 `
 
-const merchantSql = `INSERT INTO merchant_merchant (public_id) VALUES ("TestM");`
+const testMerchant = "TestM"
+const testProduct = "TestP"
+const merchantSql = `INSERT INTO merchant_merchant (public_id) VALUES (?);`
 const productSql = `
 INSERT INTO product_product
     (merchant_id, external_product_id, autoship_enabled, live)
-    VALUES (1, "TestP", 1, 1);
+    VALUES (?, ?, ?, ?);
 `
 
 type DBWrapper struct {
@@ -64,16 +67,31 @@ func (dw *DBWrapper) createTable() {
 }
 
 func (dw *DBWrapper) createData() {
-	rows := []string{merchantSql, productSql}
-	for _, row := range rows {
-		stmt, err := dw.DB.Prepare(row)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		_, err = stmt.Exec()
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+	// There shouldn't be any merchants in the DB
+	dw.insertMerchant(testMerchant, true)
+	dw.insertProduct(1, testProduct, true, true)
+}
+
+func (dw *DBWrapper) insertMerchant(publicId string, live bool) {
+	stmt, err := dw.DB.Prepare(`INSERT INTO merchant_merchant (public_id, live) VALUES (?, ?)`)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	_, err = stmt.Exec(publicId, live)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+func (dw *DBWrapper) insertProduct(merchantId int, externalProductId string, autoshipEnabled bool, live bool) {
+	stmt, err := dw.DB.Prepare(productSql)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	_, err = stmt.Exec(merchantId, externalProductId, autoshipEnabled, live)
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 }
 

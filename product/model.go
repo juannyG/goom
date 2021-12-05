@@ -13,9 +13,10 @@ type Product struct {
 const query = `
 SELECT p.external_product_id, p.autoship_enabled, p.live
    FROM product_product AS p, merchant_merchant
-   WHERE merchant_merchant.id=p.merchant_id
-   AND merchant_merchant.public_id = ?
-   AND p.external_product_id = ?
+   WHERE merchant_merchant.public_id=?
+   AND merchant_merchant.live=1
+   AND merchant_merchant.id=p.merchant_id
+   AND p.external_product_id=?
 `
 
 func GetProduct(db *sql.DB, merchantPublicId string, externalProductId string) (Product, error) {

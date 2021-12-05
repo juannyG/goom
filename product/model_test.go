@@ -30,3 +30,18 @@ func TestProductNotFound(t *testing.T) {
 
 	dw.tearDown()
 }
+
+func TestProductNotFoundIfMerchantInactive(t *testing.T) {
+	dw := DBWrapper{}
+	db := dw.InitDB()
+	defer db.Close()
+
+	dw.insertMerchant("NewM", false)
+	dw.insertProduct(2, "OtherP", true, true)
+	_, err := GetProduct(dw.DB, "NewM", "OtherP")
+	if err == nil {
+		t.Errorf("Expected error but got Product")
+	}
+
+	dw.tearDown()
+}
