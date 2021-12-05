@@ -1,9 +1,18 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gin-gonic/gin"
+
+	"goom/db"
+	"goom/product"
 )
 
 func main() {
-	fmt.Print("Hello World\n")
+	database := db.Connect()
+
+	router := gin.Default()
+	router.GET("/product", func(c *gin.Context) {
+		product.IsEligibleView(database, c)
+	})
+	router.Run()
 }
