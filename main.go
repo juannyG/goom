@@ -9,6 +9,7 @@ import (
 
 func main() {
 	database := db.Connect()
+	defer database.Close()
 
 	router := gin.Default()
 	router.GET("/product", func(c *gin.Context) {

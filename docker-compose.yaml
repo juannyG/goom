@@ -1,0 +1,23 @@
+version: '3.4'
+services:
+  goom:
+    build:
+      context: .
+    image: goom:latest
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - GOOM_DSN=ordergroove:sEcurez123@tcp(mariadb)/ordergroove?timeout=5s
+    command:
+      go
+      run
+      main.go
+    labels:
+      - "traefik.frontend.rule=Host:goom.ordergroove.localhost"
+      - "traefik.port=8080"
+
+networks:
+    default:
+        external:
+            name: local-og
